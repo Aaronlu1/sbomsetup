@@ -1,0 +1,14 @@
+# Mark all files in generated folders as auto-generated to hide them in diffs
+**/gen/** linguist-generated
+# Same for files in zap-generated folders
+**/zap-generated/** linguist-generated
+# And some specific generated files
+src/controller/python/matter/clusters/CHIPClusters.py linguist-generated
+src/controller/python/matter/clusters/Objects.py linguist-generated
+# Let bat file use CRLF linebreak
+**/*.bat eol=input
+# Mark Matter operational certificate/key files as binary
+**/*.chip binary
+# Shell scripts run inside the Linux build containers; a CRLF checkout makes
+# them fail with a confusing "bad interpreter" error. Keep them LF everywhere.
+**/*.sh text eol=lf

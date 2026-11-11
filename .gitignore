@@ -1,0 +1,10 @@
+# Editor / OS noise
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Scratch space for anyone testing apply.sh against a scratch checkout
+/tmp/
+/scratch/

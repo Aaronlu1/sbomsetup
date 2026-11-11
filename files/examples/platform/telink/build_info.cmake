@@ -1,0 +1,235 @@
+#
+#    Copyright (c) 2024 Project CHIP Authors
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+# Matter git info
+execute_process(
+    COMMAND git rev-parse HEAD
+    OUTPUT_VARIABLE MATTER_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND git diff --quiet
+    RESULT_VARIABLE MATTER_LOCAL_STATUS
+)
+
+if(MATTER_LOCAL_STATUS)
+  set(MATTER_LOCAL_STATUS "-dirty")
+else()
+  set(MATTER_LOCAL_STATUS "")
+endif()
+
+execute_process(
+    COMMAND git rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE MATTER_BRANCH_NAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# BUILD_TIMESTAMP is baked into the firmware via target_compile_definitions and
+# printed by AppTaskCommon::PrintFirmwareInfo(). Taking it from datetime.now()
+# makes every build of the same commit differ, so an SBOM cannot be used to
+# verify a shipped binary.
+#
+# Honour SOURCE_DATE_EPOCH when it is set -- the standard lever binutils and
+# GCC already respect -- and fall back to the wall clock otherwise. The
+# timestamp is still real and useful for field debugging; it is just
+# reproducible when the build asks for it.
+if (DEFINED ENV{SOURCE_DATE_EPOCH})
+    execute_process(
+        COMMAND python3 -c "import os, datetime; print(datetime.datetime.fromtimestamp(int(os.environ['SOURCE_DATE_EPOCH']), datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S'))"
+        OUTPUT_VARIABLE BUILD_TIMESTAMP
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+else()
+    execute_process(
+        COMMAND python3 -c "from datetime import datetime; print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))"
+        OUTPUT_VARIABLE BUILD_TIMESTAMP
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+
+execute_process(
+    COMMAND git show -s --format=%cd --date=format:%Y-%m-%d
+    OUTPUT_VARIABLE MATTER_COMMIT_DATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND git remote get-url origin
+    OUTPUT_VARIABLE MATTER_REMOTE_URL
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Zephyr git info
+execute_process(
+    COMMAND git -C ${ZEPHYR_BASE} rev-parse HEAD
+    OUTPUT_VARIABLE ZEPHYR_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND git -C ${ZEPHYR_BASE} rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE ZEPHYR_BRANCH_NAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND git -C ${ZEPHYR_BASE} show -s --format=%cd --date=format:%Y-%m-%d HEAD
+    OUTPUT_VARIABLE ZEPHYR_COMMIT_DATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND bash -c "git -C ${ZEPHYR_BASE} remote get-url \$(git -C ${ZEPHYR_BASE} remote | head -n 1)"
+    OUTPUT_VARIABLE ZEPHYR_REMOTE_URL
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND git -C ${ZEPHYR_BASE} diff --quiet
+    RESULT_VARIABLE ZEPHYR_LOCAL_STATUS
+)
+
+if(ZEPHYR_LOCAL_STATUS)
+    set(ZEPHYR_LOCAL_STATUS "-dirty")
+else()
+    set(ZEPHYR_LOCAL_STATUS "")
+endif()
+
+# Telink HAL info
+execute_process(
+    COMMAND git -C ${ZEPHYR_BASE}/../modules/hal/telink rev-parse HEAD
+    OUTPUT_VARIABLE TELINK_HAL_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND git -C ${ZEPHYR_BASE}/../modules/hal/telink diff --quiet
+    RESULT_VARIABLE HAL_LOCAL_STATUS
+)
+
+if(TELINK_HAL_LOCAL_STATUS)
+    set(TELINK_HAL_LOCAL_STATUS "-dirty")
+else()
+    set(TELINK_HAL_LOCAL_STATUS "")
+endif()
+
+# OpenThread info
+if(CONFIG_OPENTHREAD_TELINK_LIBRARY)
+  set(OPENTHREAD_PATH "${ZEPHYR_BASE}/../modules/lib/openthread_telink_lib")
+else()
+  set(OPENTHREAD_PATH "${ZEPHYR_BASE}/../modules/lib/openthread")
+endif()
+
+execute_process(
+    COMMAND git -C ${OPENTHREAD_PATH} rev-parse HEAD
+    OUTPUT_VARIABLE OT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+
+execute_process(
+    COMMAND git -C ${OPENTHREAD_PATH} rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE OT_BRANCH_NAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+
+execute_process(
+    COMMAND git -C ${OPENTHREAD_PATH} show -s --format=%cd --date=format:%Y-%m-%d HEAD
+    OUTPUT_VARIABLE OT_COMMIT_DATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+
+execute_process(
+    COMMAND bash -c "git -C ${OPENTHREAD_PATH} remote get-url \$(git -C ${OPENTHREAD_PATH} remote | head -n 1)"
+    OUTPUT_VARIABLE OT_REMOTE_URL
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+
+execute_process(
+    COMMAND git -C ${OPENTHREAD_PATH} diff --quiet
+    RESULT_VARIABLE OT_LOCAL_STATUS
+    ERROR_QUIET
+)
+
+if(OT_LOCAL_STATUS)
+    set(OT_LOCAL_STATUS "-dirty")
+else()
+    set(OT_LOCAL_STATUS "")
+endif()
+
+execute_process(
+    COMMAND git -C ${ZEPHYR_BASE}/../modules/hal/telink show -s --format=%cd --date=format:%Y-%m-%d
+    OUTPUT_VARIABLE TELINK_HAL_COMMIT_DATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+    COMMAND git -C ${OPENTHREAD_PATH} describe --tags --exact-match
+    OUTPUT_VARIABLE OT_TAG
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+
+target_compile_definitions(app PRIVATE
+  MATTER_COMMIT_HASH="${MATTER_COMMIT_HASH}"
+  MATTER_BRANCH="${MATTER_BRANCH_NAME}"
+  BUILD_TIMESTAMP="${BUILD_TIMESTAMP}"
+  MATTER_COMMIT_DATE="${MATTER_COMMIT_DATE}"
+  MATTER_REMOTE_URL="${MATTER_REMOTE_URL}"
+  MATTER_LOCAL_STATUS="${MATTER_LOCAL_STATUS}"
+
+  ZEPHYR_COMMIT_HASH="${ZEPHYR_COMMIT_HASH}"
+  ZEPHYR_BRANCH="${ZEPHYR_BRANCH_NAME}"
+  ZEPHYR_COMMIT_DATE="${ZEPHYR_COMMIT_DATE}"
+  ZEPHYR_REMOTE_URL="${ZEPHYR_REMOTE_URL}"
+  ZEPHYR_LOCAL_STATUS="${ZEPHYR_LOCAL_STATUS}"
+
+  TELINK_HAL_COMMIT_HASH="${TELINK_HAL_COMMIT_HASH}"
+  TELINK_HAL_LOCAL_STATUS="${TELINK_HAL_LOCAL_STATUS}"
+  TELINK_HAL_COMMIT_DATE="${TELINK_HAL_COMMIT_DATE}"
+
+  OPENTHREAD_PATH="${OPENTHREAD_PATH}"
+  OT_COMMIT_HASH="${OT_COMMIT_HASH}"
+  OT_BRANCH="${OT_BRANCH_NAME}"
+  OT_COMMIT_DATE="${OT_COMMIT_DATE}"
+  OT_REMOTE_URL="${OT_REMOTE_URL}"
+  OT_LOCAL_STATUS="${OT_LOCAL_STATUS}"
+  OT_TAG="${OT_TAG}"
+)
+
+message(STATUS "Matter revision:")
+message(STATUS "      board: ${CONFIG_BOARD}")
+message(STATUS "      branch: ${MATTER_BRANCH_NAME} ${MATTER_COMMIT_HASH} ${MATTER_COMMIT_DATE}")
+message(STATUS "      remote: ${MATTER_REMOTE_URL}")
+message(STATUS "      build timestamp: ${BUILD_TIMESTAMP}")
+
+message(STATUS "Zephyr revision:")
+message(STATUS "      branch: ${ZEPHYR_BRANCH_NAME} ${ZEPHYR_COMMIT_HASH} ${ZEPHYR_COMMIT_DATE}")
+message(STATUS "      remote: ${ZEPHYR_REMOTE_URL}")
+
+message(STATUS "HAL revision:")
+message(STATUS "      commit: ${TELINK_HAL_COMMIT_HASH} ${TELINK_HAL_COMMIT_DATE}")
+
+message(STATUS "OpenThread revision:")
+message(STATUS "      path: ${OPENTHREAD_PATH}")
+message(STATUS "      branch: ${OT_BRANCH_NAME} ${OT_COMMIT_HASH} ${OT_COMMIT_DATE}")
+if(OT_TAG)
+  message(STATUS "      tag: ${OT_TAG}")
+endif()
+message(STATUS "      remote: ${OT_REMOTE_URL}")
