@@ -1,0 +1,3 @@
+# Shell scripts run on Linux, inside the build container or on a colleague's
+# machine. A CRLF checkout breaks them with "bad interpreter".
+*.sh text eol=lf
