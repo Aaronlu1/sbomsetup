@@ -128,7 +128,7 @@ are counted but not listed.
 make_delivery.py [--build-dir DIR] [--sbom-dir DIR] [--out-dir DIR] [--zip FILE]
 ```
 
-Assembles `firmware/`, `sbom/`, `MANIFEST.json` and `SHA256SUMS`. Missing inputs
+Assembles `firmware/`, `sbom/`, `LICENSES/`, `README.md`, `manifest.json` and `SHA256SUMS`. Missing inputs
 print `skip (missing)` rather than failing.
 
 ---

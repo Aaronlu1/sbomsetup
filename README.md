@@ -25,7 +25,7 @@ Every run uploads seven artifacts:
 | `telink-sbom-spdx-enriched` | the same five, NTIA fields filled in | **primary deliverable** |
 | `telink-sbom-cyclonedx` | CycloneDX 1.6 JSON | SCA tooling |
 | `telink-sbom-review` | review CSV / gap report / prebuilt list / Trivy report | internal review |
-| `telink-sbom-delivery` | delivery zip (firmware + SBOM + MANIFEST + SHA256SUMS) | delivery pipeline |
+| `telink-sbom-delivery` | delivery zip (firmware + SBOM + LICENSES + manifest.json + SHA256SUMS) | delivery pipeline |
 | `telink-sbom-manifest` | 1.4 KB manifest + checksums | quick verification |
 
 Measured on one `tl3238x` build: **130 packages, 9 real components, 454 Matter

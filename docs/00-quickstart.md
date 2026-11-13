@@ -108,7 +108,7 @@ Download the small manifest first:
 
 ```bash
 gh run download <run-id> -n telink-sbom-manifest -D ./manifest
-cat ./manifest/MANIFEST.json
+cat ./manifest/manifest.json
 ```
 
 Then the review material:

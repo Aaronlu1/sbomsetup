@@ -16,7 +16,7 @@ The steps in `files/.github/workflows/telink-build-sbom.yaml`, in order:
 | 10 | Generate SBOM review artefacts | `sbom_review.py` | — |
 | 11 | List prebuilt archives linked into the firmware | intersect with `zephyr.map` | list far too long |
 | 12 | Assemble delivery bundle | `make_delivery.py` | `skip (missing): ...` |
-| 13 | Upload delivery manifest | small `MANIFEST.json` + `SHA256SUMS` | — |
+| 13 | Upload delivery manifest | small `manifest.json` + `SHA256SUMS` + `LICENSES/index.json` | — |
 | 14 | Show SBOM summary | prints package / supplier / purl counts | — |
 | 15 | Upload firmware | `zephyr.bin/.elf/.map` | — |
 | 16 | Upload SBOM (raw) | four zspdx documents plus matter-sources | — |

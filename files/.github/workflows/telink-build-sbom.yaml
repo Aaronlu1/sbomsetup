@@ -196,8 +196,9 @@ jobs:
                   name: telink-sbom-manifest
                   if-no-files-found: warn
                   path: |
-                      out/delivery/MANIFEST.json
+                      out/delivery/manifest.json
                       out/delivery/SHA256SUMS
+                      out/delivery/LICENSES/index.json
 
             - name: Show SBOM summary
               if: always()

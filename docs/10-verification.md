@@ -92,7 +92,7 @@ cd <unpacked delivery>
 sha256sum -c ./manifest/SHA256SUMS
 ```
 
-`MANIFEST.json`'s `commit` must equal the run's `github.sha`.
+`manifest.json`'s `commit` must equal the run's `github.sha`.
 
 ## 5. Per-run checklist
 
