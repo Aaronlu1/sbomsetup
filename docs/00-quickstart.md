@@ -61,10 +61,11 @@ on:
 
 The BLE SDK needs no separate setting: `tl_zephyr`'s `west.yml` already pins it.
 
-> Board note: the plain `tl3238x` flash map is about 684 KB and a Matter image
-> does not fit (`Image size ... exceeds requested size 0xab000`). The example
-> default is the retention variant, which carries the 2 MB map. Use whatever
-> board your release configuration uses.
+> Board/app note: the validated example pair is `tl3238x_retention` with
+> `examples/light-switch-app/telink`. A Matter image does not fit the plain
+> `tl3238x` map (`requested size 0xab000`), and some applications (for example
+> `lighting-app`) set that 0xab000 slot size themselves. Use the board and
+> application from your own release configuration.
 
 ---
 
