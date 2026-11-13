@@ -61,6 +61,11 @@ on:
 
 The BLE SDK needs no separate setting: `tl_zephyr`'s `west.yml` already pins it.
 
+> Board note: the plain `tl3238x` flash map is about 684 KB and a Matter image
+> does not fit (`Image size ... exceeds requested size 0xab000`). The example
+> default is the retention variant, which carries the 2 MB map. Use whatever
+> board your release configuration uses.
+
 ---
 
 ## 4. Commit and push
