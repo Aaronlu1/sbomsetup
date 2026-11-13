@@ -8,3 +8,7 @@ Thumbs.db
 # Scratch space for anyone testing apply.sh against a scratch checkout
 /tmp/
 /scratch/
+
+# Python bytecode (validation runs create these next to the scripts)
+__pycache__/
+*.pyc

@@ -47,6 +47,7 @@ Writes *.spdx into <sbom-dir>/enriched/ unless --in-place is given.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -128,6 +129,41 @@ def repo_from_location(download_location):
     return g.group("org"), repo
 
 
+_GITHUB_PURL_RE = re.compile(r"^pkg:github/(?P<org>[^/]+)/(?P<repo>[^@?#]+)")
+
+
+def purl_of(lines):
+    """Return the PACKAGE_MANAGER purl of a package block, if any."""
+    for line in lines:
+        if line.startswith("ExternalRef: PACKAGE_MANAGER purl "):
+            return line.split()[-1]
+    return None
+
+
+def repo_from_purl(purl):
+    """Return (org, repo) for a pkg:github purl, else (None, None)."""
+    m = _GITHUB_PURL_RE.match(purl or "")
+    if not m:
+        return None, None
+    repo = m.group("repo")
+    if repo.endswith(".git"):
+        repo = repo[: -len(".git")]
+    return m.group("org"), repo
+
+
+def repo_for(lines, download_location):
+    """Repository identity from the VCS location, falling back to the purl.
+
+    zspdx emits `PackageDownloadLocation: NOASSERTION` for the modules-deps
+    documents but still records a purl there, so the download location alone
+    leaves those packages without a supplier or a licence lookup.
+    """
+    org, repo = repo_from_location(download_location)
+    if org:
+        return org, repo
+    return repo_from_purl(purl_of(lines))
+
+
 def revision_from_location(download_location, fallback_version=""):
     """Return the VCS revision with the west state suffix stripped."""
     m = _VCS_RE.match(download_location or "")
@@ -174,7 +210,10 @@ def package_license_declared(lines, download_location, license_map):
 
     # Files carry no SPDX tag (full-text license headers). Fall back to the
     # team-confirmed license for this repository, if there is one.
-    return license_from_repo(download_location, license_map)
+    org, repo = repo_for(lines, download_location)
+    if not org:
+        return None
+    return license_map.get(f"{org}/{repo}")
 
 
 def enrich_block(lines, default_supplier, license_map):
@@ -187,7 +226,7 @@ def enrich_block(lines, default_supplier, license_map):
 
     # --- PackageSupplier -------------------------------------------------
     if field(lines, "PackageSupplier") is None:
-        org, _ = repo_from_location(dl)
+        org, _ = repo_for(lines, dl)
         additions["PackageSupplier"] = org if org else default_supplier
 
     # --- PackageLicenseDeclared -----------------------------------------
@@ -302,7 +341,37 @@ def main():
     print(f"{'TOTAL':22} {totals['packages']:4d} pkg | "
           f"+{totals['supplier']:4d} supplier  +{totals['license']:4d} license  "
           f"+{totals['purl']:4d} purl")
+
+    update_external_refs(dst)
     print(f"\nwritten to: {dst}")
+
+
+def update_external_refs(dst):
+    """Point build.spdx at the documents as they exist in this directory.
+
+    zspdx writes ExternalDocumentRef with the checksum of the raw documents.
+    Enrichment rewrites those documents, so shipping the enriched set with the
+    original checksums makes the set internally inconsistent -- a consumer that
+    verifies the references rejects it.
+    """
+    build = os.path.join(dst, "build.spdx")
+    if not os.path.exists(build):
+        return
+    text = open(build, encoding="utf-8").read()
+    updated = 0
+    for name in sorted(os.listdir(dst)):
+        if not name.endswith(".spdx") or name == "build.spdx":
+            continue
+        doc = name[: -len(".spdx")]
+        path = os.path.join(dst, name)
+        sha1 = hashlib.sha1(open(path, "rb").read()).hexdigest()
+        pattern = re.compile(
+            r"(ExternalDocumentRef:\s+\S+\s+\S*/" + re.escape(doc) + r"\s+SHA1:\s*)[0-9a-f]{40}")
+        text, n = pattern.subn(lambda m: m.group(1) + sha1, text)
+        updated += n
+    with open(build, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
+    print(f"build.spdx: refreshed {updated} ExternalDocumentRef checksum(s)")
 
 
 if __name__ == "__main__":
