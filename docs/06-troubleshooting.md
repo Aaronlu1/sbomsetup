@@ -19,6 +19,8 @@ cross-referencing, not severity.
 | `could not download trivy` / `not a valid tarball` | 20 |
 | Actions tab shows only “Get started” | 8, 9 |
 | `was query directory created before cmake build ran?` | 25 |
+| `invalid subvalue format for ... (no colon found)` | 26 |
+| `No vulnerabilities found` for every document | 27 |
 
 Two failures have **no log fragment at all**, because nothing prints:
 
@@ -65,11 +67,13 @@ problem.
 | 22 | Two builds of the same commit needed for a reproducibility check, but `gh run rerun` only ever yields one set of artifacts | `rerun` re-runs the same run and **replaces** the previous attempt's artifacts rather than keeping both | dispatch twice instead (`gh workflow run`), waiting for each to finish -- and see 24 |
 | 23 | `gh run download -n telink-firmware` leaves an **empty directory and exits 0**, looking exactly like an expired artifact | the ~33 MB archive was truncated in transit (flaky proxy on the client side, not GitHub); a truncated zip has no central directory | fetch through the API with resume: `curl -sSL -C - -H "Authorization: Bearer $(gh auth token)" -o fw.zip https://api.github.com/repos/<owner>/<repo>/actions/artifacts/<id>/zip`, retrying until `unzip -t fw.zip` passes. A truncated zip is recognisable by its size being smaller than the artifacts API reports |
 | 24 | Second `gh workflow run` cancels the first | the workflow sets `concurrency: cancel-in-progress: true` on the same ref | wait for each run to complete before dispatching the next |
+| 26 | A scanner refuses to read the SBOM at all: `unable to decode spdx tag-value: invalid subvalue format for <name> (no colon found)` | **`PackageSupplier` needs a typed prefix.** SPDX 2.3 defines it as `[Person: | Organization: | NOASSERTION] <value>`; a bare name is a spec violation. One bad field makes the whole document undecodable, so every package loses its CPE and every scan reports zero | emit `PackageSupplier: Organization: <name>`, and assert that the count of typed values equals the package count. Hand-written test fixtures are written from the spec and therefore already have the correct form -- **only running a real build artifact exposes this** |
+| 27 | Vulnerability scan reports zero findings for every C/C++ library | depends on the scanner. **Trivy's SPDX decoder reads only purl** -- `parseExternalReferences()` filters on `RefTypePurl` and skips everything else -- so it cannot see the CPE that zspdx emits, and `pkg:github/<org>/<repo>@<sha>` is in no ecosystem index | use **Grype**, whose Syft-based decoder has `extractCPEs()` and reads `cpe23Type`. Verified on a real SBOM: purl only gives "No vulnerabilities found"; the same package with its CPE gives 16 mbedtls CVEs. Scan only component-bearing documents -- `build.spdx` holds CMake targets with no version or identifier, and Grype matched one named `debug` to the npm package of that name |
 | 25 | The CMake query was created but zspdx still bails: `cmake api reply directory .../.cmake/api/v1/reply does not exist` / `was query directory created before cmake build ran?` | **CMake decides which file-based API queries to answer before it processes any `CMakeLists.txt`.** Creating `<build>/.cmake/api/v1/query/codemodel-v2` from CMake code at configure time is therefore too late -- the file appears in the build directory and CMake never reads it. The CMake documentation's "replies are written when it runs to generate a build system" describes when replies are *written*, not when queries are *read* | keep `west spdx --init` **before** `west build`, which is what `sbom_build.sh` does. The query has to exist before CMake starts. The only in-build route is a `PreLoad.cmake` in each application source directory -- the route Zephyr's own SBOM test takes, and which it labels "an undocumented feature" |
 
 ---
 
-## Two methodological reminders
+## Methodological reminders
 
 1. **A green job does not mean complete metadata.** Every non-critical step is
    written to skip with a printed reason. Search the log for `skipping`,
@@ -77,3 +81,13 @@ problem.
 2. **Never judge by file name alone.** Both `libc.a` and `FilesAnalyzed: false`
    caused mistakes: the first produced false positives, the second would have
    dropped real components. Use the linker map or a content hash.
+3. **Test against a real build artifact, not a fixture you wrote.** A fixture
+   is written from the spec, so it already has the shape the spec requires and
+   cannot reveal that the pipeline produces something else. Issue 26 was
+   invisible to a hand-written SPDX file and appeared the moment a real
+   enriched SBOM was scanned.
+4. **A summary that reports zero is indistinguishable from a clean result.**
+   Issue 27's first symptom was a counter printing "0 findings" next to a
+   detail listing that showed 16. When a count and its detail disagree, the
+   count is the thing to suspect. Count identifiers, not table columns --
+   column position changes between tool versions and output formats.
