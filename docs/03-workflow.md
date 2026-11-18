@@ -39,6 +39,28 @@ on:
 The `workflow_dispatch` inputs only apply to manual runs; push runs use the
 defaults in the YAML.
 
+To trigger from the command line:
+
+```bash
+gh workflow run telink-build-sbom.yaml \
+  --repo <owner>/<repo> \
+  --ref <branch>
+
+# with explicit inputs
+gh workflow run telink-build-sbom.yaml \
+  --repo <owner>/<repo> \
+  --ref <branch> \
+  -f board=tl3238x_retention \
+  -f app=examples/light-switch-app/telink
+```
+
+**Prefer this over pushing.** A push only fires when the changed files match the
+workflow's `paths` filter, so a commit touching only documentation builds
+nothing. Dispatching is also the only way to build the same commit a second
+time without changing anything, which is how you check reproducibility --
+`gh run rerun` cannot be used for that (see
+[`06-troubleshooting.md`](06-troubleshooting.md), issue 22).
+
 ---
 
 ## Environment variables

@@ -19,6 +19,16 @@ cross-referencing, not severity.
 | `could not download trivy` / `not a valid tarball` | 20 |
 | Actions tab shows only “Get started” | 8, 9 |
 
+Two failures have **no log fragment at all**, because nothing prints:
+
+- **23** -- an empty artifact directory with a zero exit code.
+- **24** -- a run that was replaced by the next one.
+
+Both are command-line side, not CI side. Check them before assuming a build
+problem.
+
+---
+
 ---
 
 ## Local environment
@@ -51,6 +61,9 @@ cross-referencing, not severity.
 | 19 | Namespace points at the kit author's repository; different commits collide | the default prefix was author-only and version-less | use `https://github.com/<repo>/spdx/<commit>` |
 | 20 | Trivy step “succeeds” without producing a report | the pinned version no longer exists, the URL 404s, `tar` fails and the step skips | pin a version that exists; add `curl -f` and a `tar -tzf` pre-check |
 | 21 | Trivy: `failed to unmarshal component type` | CycloneDX root component `type` is `firmware`, which Trivy rejects | emit `application` |
+| 22 | Two builds of the same commit needed for a reproducibility check, but `gh run rerun` only ever yields one set of artifacts | `rerun` re-runs the same run and **replaces** the previous attempt's artifacts rather than keeping both | dispatch twice instead (`gh workflow run`), waiting for each to finish -- and see 24 |
+| 23 | `gh run download -n telink-firmware` leaves an **empty directory and exits 0**, looking exactly like an expired artifact | the ~33 MB archive was truncated in transit (flaky proxy on the client side, not GitHub); a truncated zip has no central directory | fetch through the API with resume: `curl -sSL -C - -H "Authorization: Bearer $(gh auth token)" -o fw.zip https://api.github.com/repos/<owner>/<repo>/actions/artifacts/<id>/zip`, retrying until `unzip -t fw.zip` passes. A truncated zip is recognisable by its size being smaller than the artifacts API reports |
+| 24 | Second `gh workflow run` cancels the first | the workflow sets `concurrency: cancel-in-progress: true` on the same ref | wait for each run to complete before dispatching the next |
 
 ---
 
