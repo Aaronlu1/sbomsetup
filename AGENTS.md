@@ -94,11 +94,15 @@ Expected:
 
 | Check | Expectation |
 |---|---|
-| Artifact count | 7 |
+| Artifact count | 8 |
 | `sbom-review.csv` | a handful of rows, `NEEDS_REVIEW` in single digits |
 | `prebuilt-binaries.txt` | only archives actually linked (1–5 entries) |
-| `trivy-sbom.json` | parses, `Trivy.Version` matches `TRIVY_VERSION` |
+| `telink-sbom-vuln` | one table per scanned document, counts agreeing with the detail below them, and no `CPE map skip` in the log |
 | `SHA256SUMS` | matches the files in the delivery package line by line |
+
+A scan that finds nothing for a component is **not** evidence that the
+component is clean. Read `docs/07-vulnerability-scan.md` §4 before writing
+anything about vulnerability status into a customer document.
 
 ---
 
@@ -111,7 +115,8 @@ Expected:
 | `west blobs fetch` checksum | `docs/06-troubleshooting.md` #12 |
 | `fetch_sdk.sh: No such file` | `docs/06-troubleshooting.md` #11 |
 | `failed to unmarshal component type` | `docs/07-vulnerability-scan.md` |
-| `could not download trivy` | `docs/07-vulnerability-scan.md` |
+| `could not install grype` | `docs/07-vulnerability-scan.md`, network |
+| `CPE map skip` | `docs/06-troubleshooting.md` #31 |
 | `Syntax error: redirection unexpected` | `docs/06-troubleshooting.md` #16 |
 | SPDX path `../<repo>/...` | `docs/04-scripts.md`, `--repo-root` |
 

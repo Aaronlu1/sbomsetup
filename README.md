@@ -16,15 +16,16 @@ This repository is a **kit**, not a library. It holds the files to add to a
 
 ## What you get
 
-Every run uploads seven artifacts:
+Every run uploads eight artifacts:
 
 | Artifact | Contents | Audience |
 |---|---|---|
 | `telink-firmware` | `zephyr.bin`, `.elf`, `.map` | shipping / debugging |
 | `telink-sbom-spdx-raw` | raw zspdx output, five SPDX documents | traceability |
 | `telink-sbom-spdx-enriched` | the same five, NTIA fields filled in | **primary deliverable** |
-| `telink-sbom-cyclonedx` | CycloneDX 1.6 JSON | SCA tooling |
-| `telink-sbom-review` | review CSV / gap report / prebuilt list / Trivy report | internal review |
+| `telink-sbom-cyclonedx` | CycloneDX 1.6 JSON, CPEs included | SCA tooling |
+| `telink-sbom-review` | review CSV / gap report / prebuilt list | internal review |
+| `telink-sbom-vuln` | one Grype findings table per scanned document | triage |
 | `telink-sbom-delivery` | delivery zip (firmware + SBOM + LICENSES + manifest.json + SHA256SUMS) | delivery pipeline |
 | `telink-sbom-manifest` | 1.4 KB manifest + checksums | quick verification |
 
@@ -70,11 +71,11 @@ sbomsetup/
 │   ├── 00-quickstart.md         from zero to the first successful run
 │   ├── 01-architecture.md       how the build-level SBOM is produced
 │   ├── 02-prerequisites.md      repository, Actions, disk, container
-│   ├── 03-workflow.md           the 20 workflow steps
+│   ├── 03-workflow.md           the 21 workflow steps
 │   ├── 04-scripts.md            script interfaces and gotchas
 │   ├── 05-reproducibility.md    reproducible builds
 │   ├── 06-troubleshooting.md    known problems and fixes
-│   ├── 07-vulnerability-scan.md Trivy integration
+│   ├── 07-vulnerability-scan.md Grype, CPE coverage, what a zero means
 │   ├── 08-delivery-bundle.md    delivery package and manifest
 │   ├── 09-adapting.md           other branches / repos / CI platforms
 │   └── 10-verification.md       how to verify the output

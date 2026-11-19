@@ -88,12 +88,20 @@ carry the same flag but may really be linked.
 
 ```bash
 enrich_sbom.py <sbom-dir> [--license-map module_licenses.json] [--default-supplier NAME]
+enrich_sbom.py <sbom-dir> [--cpe-map module_cpes.json]
 ```
 
-- supplier: VCS location → purl → default
+- supplier: VCS location → purl → default, always with the SPDX-required
+  `Organization: ` prefix
 - licence: existing conclusion → aggregated file-level licences (AND-joined on
   conflict) → `module_licenses.json`
+- CPE: `module_cpes.json`, applied only while the package still sits at the
+  revision the entry was verified against, and never on a package that already
+  carries an `ExternalRef: SECURITY` line
 - after all documents are written, refreshes `build.spdx`'s external references
+- then asserts every `PackageSupplier` value is typed. An untyped one makes
+  strict decoders reject the whole document, which the far end reports as "no
+  findings" rather than as an error, so this exits non-zero instead
 - idempotent
 
 ---
@@ -107,6 +115,11 @@ spdx_to_cyclonedx.py <enriched-dir> -o <out.cdx.json>
 Gotcha: the root component type is `application`. CycloneDX 1.6's `firmware`
 type is rejected by Trivy's decoder (`failed to unmarshal component type`),
 which makes the whole document unscannable.
+
+The converter carries the CPE through to each component's `cpe` field, and drops
+the SPDX `Organization:` prefix from the supplier name on the way out. Both
+matter to a consumer: the CPE is the only identifier here a vulnerability
+database can resolve, and CycloneDX's supplier is a plain name field.
 
 ---
 
@@ -146,3 +159,29 @@ print `skip (missing)` rather than failing.
 - entries under `needs_review` are **not** applied; they only explain gaps
 - use SPDX identifiers or expressions only; when unsure, leave the entry in
   `needs_review`
+
+---
+
+## module_cpes.json
+
+```json
+{
+  "cpes": {
+    "<org>/<repo>": {
+      "cpe": "cpe:2.3:a:<vendor>:<product>:<version>:*:*:*:*:*:*:*",
+      "revision": "<the module commit this was verified against>",
+      "version_source": "<where the version was read from>",
+      "evidence": "<what matched it to CVEs>"
+    }
+  },
+  "not_covered": { "<org>/<repo>": "<why no CPE can be used>" }
+}
+```
+
+- entries under `cpes` are applied automatically, but only while the package
+  still sits at `revision`
+- entries under `not_covered` are documentation; they are what stops the next
+  person repeating the search
+- the CPE is what makes a component visible to a vulnerability scanner at all,
+  since the purl points at a source repository that no advisory database indexes
+- read `07-vulnerability-scan.md` §5 before adding an entry

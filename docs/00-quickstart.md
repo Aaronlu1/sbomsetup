@@ -98,7 +98,7 @@ A job called **Telink Build + SBOM** should appear. First-run timing:
 
 ## 6. Acceptance
 
-A successful run produces seven artifacts:
+A successful run produces eight artifacts:
 
 ```
 telink-firmware
@@ -106,6 +106,7 @@ telink-sbom-spdx-raw
 telink-sbom-spdx-enriched
 telink-sbom-cyclonedx
 telink-sbom-review
+telink-sbom-vuln
 telink-sbom-delivery
 telink-sbom-manifest
 ```

@@ -20,7 +20,8 @@ telink-sbom-delivery.zip
 ├── sbom/{app,zephyr,build,modules-deps,matter-sources}.spdx   ← enriched
 ├── sbom/telink-matter.cdx.json
 ├── sbom/prebuilt-binaries.txt
-├── sbom/trivy-sbom.json
+├── sbom/vuln/{zephyr,modules-deps}.txt   ← Grype findings, if the scan ran
+
 └── LICENSES/
     ├── README.md
     ├── index.json
@@ -153,7 +154,7 @@ Division of labour:
 | exact "compiled into the firmware" source list and file hashes | this kit |
 | reproducible-build evidence | this kit |
 | whole-package CVE scan | scan-based tool |
-| build-level CVE triage | this kit's Trivy |
+| build-level CVE triage | this kit's Grype scan (`sbom/vuln/`, `07-vulnerability-scan.md`) |
 
 ## 7. Suggested archiving
 

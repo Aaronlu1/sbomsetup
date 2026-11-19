@@ -31,7 +31,7 @@ GitHub Actions (chip-build-telink container)
         ├─ filter_sbom.py                    keep only modules in zephyr.map
         ├─ enrich_sbom.py                    fill fields, refresh references
         ├─ spdx_to_cyclonedx.py
-        ├─ trivy sbom                        vulnerability scan (report-only)
+        ├─ grype sbom                        vulnerability scan (report-only)
         └─ sbom_review.py + make_delivery.py
 ```
 
@@ -110,5 +110,5 @@ is internally inconsistent.
 | 5 SPDX documents | app / zephyr / build / modules-deps / matter-sources |
 | CycloneDX 1.6 | component level, for SCA tooling |
 | Review material | `sbom-review.csv`, `sbom-gaps.md`, `prebuilt-binaries.txt` |
-| Vulnerability report | `trivy-sbom.json/.txt` |
+| Vulnerability report | `vuln/<document>.txt`, one Grype table per document |
 | Delivery package | firmware + SBOM + manifest + checksums |

@@ -75,7 +75,7 @@ Without it, restoring the 1.5 GB bootstrap cache fails with
 |---|---|
 | Repository write access | able to push to the target branch |
 | Container registry | access to `ghcr.io` (public) |
-| External downloads | GitHub Releases (Trivy), pip, cipd (bootstrap) |
+| External downloads | `raw.githubusercontent.com` (the Grype installer), pip, cipd (bootstrap) |
 | Proxy | if the runner needs one, make sure `HTTPS_PROXY` reaches the container shell |
 
 ---

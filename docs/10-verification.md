@@ -49,7 +49,8 @@ directory.
 | `pyspdxtools` | `pyspdxtools -i sbom.spdx` |
 | `cyclonedx-cli` | `cyclonedx validate --input-file telink-matter.cdx.json` |
 | `sbomqs` | `sbomqs score --category ntia telink-matter.cdx.json` |
-| `trivy` | `trivy sbom telink-matter.cdx.json` |
+| `grype` | `grype sbom:telink-matter.cdx.json` — non-zero findings are expected, and are the point of the CPE work (`07-vulnerability-scan.md`) |
+| `trivy` | `trivy sbom telink-matter.cdx.json` — will report nothing useful; its SPDX decoder reads only purl |
 
 ## 2. Expected magnitudes
 
@@ -96,10 +97,13 @@ sha256sum -c ./manifest/SHA256SUMS
 
 ## 5. Per-run checklist
 
-- [ ] all seven artifacts present
+- [ ] all eight artifacts present
 - [ ] `sbom-gaps.md` shows single-digit `NEEDS_REVIEW`
 - [ ] `prebuilt-binaries.txt` lists only archives linked into the firmware
-- [ ] `trivy-sbom.json` parses and its version matches `TRIVY_VERSION`
+- [ ] `telink-sbom-vuln` holds one report per scanned document, and its
+      per-document counts match what the detail lists underneath them
+- [ ] no `CPE map skip` line in the log, and no `WARNING` about a CPE map entry
+- [ ] `telink-matter.cdx.json` carries a `cpe` on the components the map covers
 - [ ] enriched `ExternalDocumentRef` checksums match the actual files
 - [ ] firmware timestamp equals the commit time
 - [ ] every line of `SHA256SUMS` passes

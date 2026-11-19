@@ -1,4 +1,4 @@
-# 03 · The 20 workflow steps
+# 03 · The 21 workflow steps
 
 The steps in `files/.github/workflows/telink-build-sbom.yaml`, in order:
 
@@ -12,7 +12,7 @@ The steps in `files/.github/workflows/telink-build-sbom.yaml`, in order:
 | 6 | Keep only modules that were actually linked | `filter_sbom.py` using `zephyr.map` | package count does not drop |
 | 7 | Enrich SBOM for NTIA compliance | `enrich_sbom.py` | — |
 | 8 | Convert SBOM to CycloneDX | `spdx_to_cyclonedx.py` | unexpected component count |
-| 9 | Scan SBOM for vulnerabilities | `trivy sbom` (report-only) | `could not download trivy`; `unmarshal component type` |
+| 9 | Scan SBOM for vulnerabilities | `grype sbom` (report-only) | `could not install grype`; findings that do not add up |
 | 10 | Generate SBOM review artefacts | `sbom_review.py` | — |
 | 11 | List prebuilt archives linked into the firmware | intersect with `zephyr.map` | list far too long |
 | 12 | Assemble delivery bundle | `make_delivery.py` | `skip (missing): ...` |
@@ -22,8 +22,9 @@ The steps in `files/.github/workflows/telink-build-sbom.yaml`, in order:
 | 16 | Upload SBOM (raw) | four zspdx documents plus matter-sources | — |
 | 17 | Upload SBOM (enriched) | NTIA-complete set | — |
 | 18 | Upload SBOM (CycloneDX) | `telink-matter.cdx.json` | — |
-| 19 | Upload SBOM review artefacts | review CSV, gap report, prebuilt list, Trivy report | — |
-| 20 | Upload delivery bundle | `telink-sbom-delivery.zip` | — |
+| 19 | Upload SBOM review artefacts | review CSV, gap report, prebuilt list | — |
+| 20 | Upload vulnerability report | one Grype table per document, `telink-sbom-vuln` | — |
+| 21 | Upload delivery bundle | `telink-sbom-delivery.zip` | — |
 
 ---
 
@@ -68,7 +69,6 @@ time without changing anything, which is how you check reproducibility --
 | Variable | Purpose | Notes |
 |---|---|---|
 | `TELINK_ZEPHYR_REV` | Zephyr release commit | must match the Matter branch |
-| `TRIVY_VERSION` | scanner version | the asset name contains the version; a wrong value 404s |
 | `SBOM_NAMESPACE_PREFIX` | SPDX document namespace | already includes `github.repository` and the commit |
 | `CHIP_NO_LOG_TIMESTAMPS` | no timestamps in firmware logs | removes a source of non-determinism |
 
@@ -83,9 +83,10 @@ time without changing anything, which is how you check reproducibility --
 | Build + spdx | `=== SBOM generation OK`, four non-empty documents |
 | GN sources | `sources emitted : N` (N in the hundreds) |
 | Filter | `zephyr.spdx: keep 8, drop 50`-style output |
-| Trivy | `Version: <TRIVY_VERSION>` and `Detected SBOM format` |
+| Grype | `grype version` output, then a findings count per document |
+| Enrichment | `PackageSupplier: every value carries a typed prefix` |
 | Delivery | `delivery: out/delivery (N payload files)` |
-| Uploads | six artifacts, none empty |
+| Uploads | eight artifacts, none empty |
 
 ---
 
