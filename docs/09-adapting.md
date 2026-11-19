@@ -19,6 +19,13 @@ Notes:
   `--sdk-repo/--sdk-hash`. **Follow the script in the target branch**
 - `build_info.cmake` can be replaced with the kit version; the diff should be
   exactly +22/−5
+- **`module_cpes.json` does not travel.** Every entry is pinned to the revision
+  it was verified at, and another branch pins different revisions, so each entry
+  disables itself and the log fills with `CPE map skip` (see
+  `07-vulnerability-scan.md` §5). That is the intended behaviour, not a failure:
+  re-derive the version from the new revision before re-enabling an entry, and
+  expect the scan to cover only whatever the modules themselves declare until
+  you do
 
 ## 2. Another board or application on the same branch
 
