@@ -21,6 +21,12 @@ telink-sbom-delivery.zip
 ├── sbom/telink-matter.cdx.json
 ├── sbom/prebuilt-binaries.txt
 ├── sbom/build-config.txt                 ← mbedtls/PSA/TLS switches from zephyr/.config
+├── sbom/build-symbols.txt                ← mbedtls entry points linked into the image
+├── sbom/*.spdx.json                      ← SPDX JSON view of each document
+├── sbom/files.spdx.json                  ← file-level SPDX JSON
+├── sbom/files.cdx.json                   ← file-level CycloneDX
+├── sbom/dependency-graph.json            ← nodes and edges from SPDX relationships
+├── sbom/vex/*.json                       ← VEX statements (OpenVEX / CycloneDX)
 ├── sbom/vuln/{zephyr,modules-deps}.txt   ← Grype findings, if the scan ran
 
 └── LICENSES/
@@ -51,6 +57,8 @@ evidence to cite.
     "signature_status": "not-signed"
   },
   "sbomFiles": ["sbom/app.spdx", "..."],
+  "sbomJsonFiles": ["sbom/app.spdx.json", "sbom/files.spdx.json", "..."],
+  "vexFiles": ["sbom/vex/<product>.openvex.json", "..."],
   "firmware": [{"path": "firmware/zephyr.bin", "sha256": "...", "bytes": 0}],
   "licenses": {
     "identified": 4,
@@ -80,6 +88,11 @@ Rules:
 - `buildConfig` ties the VEX statements back to the generated `zephyr/.config`:
   its SHA-256, the Zephyr commit and the profile it was derived from. It is
   `null` when the configuration export did not run.
+- `vexFiles` lists the VEX documents carried in `sbom/vex/`; the repository's
+  `vex/` directory is copied verbatim, so updating a statement is a file change
+  rather than a pipeline change.
+- `sbomJsonFiles` lists the JSON views (per-document SPDX, file-level pair,
+  dependency graph). The tag-value documents remain the source of truth.
 
 ## 4. LICENSES/
 

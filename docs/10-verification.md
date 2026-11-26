@@ -109,5 +109,9 @@ sha256sum -c ./manifest/SHA256SUMS
 - [ ] no `CPE map skip` line in the log, and no `WARNING` about a CPE map entry
 - [ ] `telink-matter.cdx.json` carries a `cpe` on the components the map covers
 - [ ] enriched `ExternalDocumentRef` checksums match the actual files
+- [ ] `sbomJsonFiles` entries parse as JSON, and `files.spdx.json` lists the
+      same file count as the tag-value documents
+- [ ] `vexFiles` are present, and every `not_affected` statement carries a
+      `justification`
 - [ ] firmware timestamp equals the commit time
 - [ ] every line of `SHA256SUMS` passes

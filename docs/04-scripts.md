@@ -10,7 +10,8 @@ All scripts live in the target repository under `scripts/tools/telink/`.
 | `enrich_sbom.py` | supplier / licence / purl, refresh references | sbom dir | `enriched/*.spdx` |
 | `spdx_to_cyclonedx.py` | convert to CycloneDX 1.6 | enriched dir | `*.cdx.json` |
 | `sbom_review.py` | review artefacts | enriched dir | `sbom-review.csv`, `sbom-gaps.md` |
-| `make_delivery.py` | assemble the delivery package | build / sbom dirs | `delivery/`, zip |
+| `make_auxiliary.py` | JSON views: per-document SPDX, file-level pair, dependency graph | enriched dir | `aux/` |
+| `make_delivery.py` | assemble the delivery package | build / sbom dirs, `vex/` | `delivery/`, zip |
 
 ---
 
