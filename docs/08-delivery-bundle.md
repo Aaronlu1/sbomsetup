@@ -20,6 +20,7 @@ telink-sbom-delivery.zip
 ├── sbom/{app,zephyr,build,modules-deps,matter-sources}.spdx   ← enriched
 ├── sbom/telink-matter.cdx.json
 ├── sbom/prebuilt-binaries.txt
+├── sbom/build-config.txt                 ← mbedtls/PSA/TLS switches from zephyr/.config
 ├── sbom/vuln/{zephyr,modules-deps}.txt   ← Grype findings, if the scan ran
 
 └── LICENSES/
@@ -59,6 +60,12 @@ evidence to cite.
   },
   "validationErrorCount": 0,
   "reviewWarningCount": 1,
+  "buildConfig": {
+    "file": "sbom/build-config.txt",
+    "sha256": "...",
+    "zephyrCommit": "<zephyr commit>",
+    "derivedFrom": "Zephyr 4.1.0 mbedtls Kconfig"
+  },
   "files": [{"path": "README.md", "sha256": "..."}]
 }
 ```
@@ -70,6 +77,9 @@ Rules:
 - `deliveryStatus` is `release-ready` when `releaseReady` is true, otherwise
   `analysis-preview`
 - `files[]` covers every payload file except `manifest.json` and `SHA256SUMS`
+- `buildConfig` ties the VEX statements back to the generated `zephyr/.config`:
+  its SHA-256, the Zephyr commit and the profile it was derived from. It is
+  `null` when the configuration export did not run.
 
 ## 4. LICENSES/
 

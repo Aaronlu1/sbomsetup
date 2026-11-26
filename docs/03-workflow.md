@@ -1,4 +1,4 @@
-# 03 · The 21 workflow steps
+# 03 · The 22 workflow steps
 
 The steps in `files/.github/workflows/telink-build-sbom.yaml`, in order:
 
@@ -8,23 +8,24 @@ The steps in `files/.github/workflows/telink-build-sbom.yaml`, in order:
 | 2 | Checkout submodules & Bootstrap | submodules and the pigweed environment | `Could not find GN_EXECUTABLE` |
 | 3 | Pin Telink Zephyr and modules to the release revision | `update_zephyr.py <rev>`; `west update` fetches modules and `tl_ble_sdk` | `west blobs fetch` checksum; `No such file` |
 | 4 | Build example and generate SPDX SBOM | `sbom_build.sh`: init → build → patch → spdx | devicetree / GN / zspdx errors |
-| 5 | Generate Matter source SBOM from the GN build | `gn_sources_to_spdx.py` | `sources emitted : 0` |
-| 6 | Keep only modules that were actually linked | `filter_sbom.py` using `zephyr.map` | package count does not drop |
-| 7 | Enrich SBOM for NTIA compliance | `enrich_sbom.py` | — |
-| 8 | Convert SBOM to CycloneDX | `spdx_to_cyclonedx.py` | unexpected component count |
-| 9 | Scan SBOM for vulnerabilities | `grype sbom` (report-only) | `could not install grype`; findings that do not add up |
-| 10 | Generate SBOM review artefacts | `sbom_review.py` | — |
-| 11 | List prebuilt archives linked into the firmware | intersect with `zephyr.map` | list far too long |
-| 12 | Assemble delivery bundle | `make_delivery.py` | `skip (missing): ...` |
-| 13 | Upload delivery manifest | small `manifest.json` + `SHA256SUMS` + `LICENSES/index.json` | — |
-| 14 | Show SBOM summary | prints package / supplier / purl counts | — |
-| 15 | Upload firmware | `zephyr.bin/.elf/.map` | — |
-| 16 | Upload SBOM (raw) | four zspdx documents plus matter-sources | — |
-| 17 | Upload SBOM (enriched) | NTIA-complete set | — |
-| 18 | Upload SBOM (CycloneDX) | `telink-matter.cdx.json` | — |
-| 19 | Upload SBOM review artefacts | review CSV, gap report, prebuilt list | — |
-| 20 | Upload vulnerability report | one Grype table per document, `telink-sbom-vuln` | — |
-| 21 | Upload delivery bundle | `telink-sbom-delivery.zip` | — |
+| 5 | Export mbedtls build configuration | writes `sbom/build-config.txt` from `zephyr/.config` | `.config` missing (build did not configure) |
+| 6 | Generate Matter source SBOM from the GN build | `gn_sources_to_spdx.py` | `sources emitted : 0` |
+| 7 | Keep only modules that were actually linked | `filter_sbom.py` using `zephyr.map` | package count does not drop |
+| 8 | Enrich SBOM for NTIA compliance | `enrich_sbom.py` | — |
+| 9 | Convert SBOM to CycloneDX | `spdx_to_cyclonedx.py` | unexpected component count |
+| 10 | Scan SBOM for vulnerabilities | `grype sbom` (report-only) | `could not install grype`; findings that do not add up |
+| 11 | Generate SBOM review artefacts | `sbom_review.py` | — |
+| 12 | List prebuilt archives linked into the firmware | intersect with `zephyr.map` | list far too long |
+| 13 | Assemble delivery bundle | `make_delivery.py` | `skip (missing): ...` |
+| 14 | Upload delivery manifest | small `manifest.json` + `SHA256SUMS` + `LICENSES/index.json` | — |
+| 15 | Show SBOM summary | prints package / supplier / purl counts | — |
+| 16 | Upload firmware | `zephyr.bin/.elf/.map` | — |
+| 17 | Upload SBOM (raw) | four zspdx documents plus matter-sources | — |
+| 18 | Upload SBOM (enriched) | NTIA-complete set | — |
+| 19 | Upload SBOM (CycloneDX) | `telink-matter.cdx.json` | — |
+| 20 | Upload SBOM review artefacts | review CSV, gap report, prebuilt list, build-config | — |
+| 21 | Upload vulnerability report | one Grype table per document, `telink-sbom-vuln` | — |
+| 22 | Upload delivery bundle | `telink-sbom-delivery.zip` | — |
 
 ---
 

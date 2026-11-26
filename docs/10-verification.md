@@ -95,6 +95,10 @@ sha256sum -c ./manifest/SHA256SUMS
 
 `manifest.json`'s `commit` must equal the run's `github.sha`.
 
+`manifest.json.buildConfig` must reference `sbom/build-config.txt`, and its
+`sha256` must match that file in the bundle; `zephyrCommit` must equal
+`TELINK_ZEPHYR_REV`. This is the evidence VEX statements rest on.
+
 ## 5. Per-run checklist
 
 - [ ] all eight artifacts present
