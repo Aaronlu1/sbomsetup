@@ -139,11 +139,13 @@ are counted but not listed.
 ## make_delivery.py
 
 ```bash
-make_delivery.py [--build-dir DIR] [--sbom-dir DIR] [--out-dir DIR] [--zip FILE]
+make_delivery.py [--build-dir DIR] [--sbom-dir DIR] [--out-dir DIR] \
+                 [--vex-dir DIR] [--manual-review FILE] [--zip FILE]
 ```
 
-Assembles `firmware/`, `sbom/`, `LICENSES/`, `README.md`, `manifest.json` and `SHA256SUMS`. Missing inputs
-print `skip (missing)` rather than failing.
+Assembles `firmware/`, `sbom/`, `LICENSES/`, `README.md`, `manifest.json` and `SHA256SUMS`, copies the
+VEX documents from `--vex-dir` (default `vex/`) and the manual review record from `--manual-review`
+(default `manual-review/manual-review.csv`). Missing inputs print `skip (missing)` rather than failing.
 
 ---
 

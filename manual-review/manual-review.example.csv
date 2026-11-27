@@ -1,0 +1,2 @@
+component,version,commit,purl,scan_status,sources_checked,conclusion,evidence_url,reviewer,reviewed_at,next_review
+example-component,1.0.0,,pkg:github/org/repo@1.0.0,uncovered,"GHSA,OSV,NVD,release notes","pending: explain what was checked and what remains open",https://github.com/org/repo/security/advisories,reviewer,2026-01-01,2026-04-01

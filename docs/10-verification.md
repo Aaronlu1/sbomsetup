@@ -113,5 +113,9 @@ sha256sum -c ./manifest/SHA256SUMS
       same file count as the tag-value documents
 - [ ] `vexFiles` are present, and every `not_affected` statement carries a
       `justification`
+- [ ] `manifest.manualReview` matches `sbom/manual-review.csv`: same SHA-256,
+      same row count, and `pending` counts rows whose conclusion is still open
+- [ ] every component without a CPE appears in `manual-review.csv` and is not
+      described as clean while its conclusion contains `pending`
 - [ ] firmware timestamp equals the commit time
 - [ ] every line of `SHA256SUMS` passes

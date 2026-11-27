@@ -27,6 +27,7 @@ telink-sbom-delivery.zip
 ├── sbom/files.cdx.json                   ← file-level CycloneDX
 ├── sbom/dependency-graph.json            ← nodes and edges from SPDX relationships
 ├── sbom/vex/*.json                       ← VEX statements (OpenVEX / CycloneDX)
+├── sbom/manual-review.csv                ← review record for components without a CPE
 ├── sbom/vuln/{zephyr,modules-deps}.txt   ← Grype findings, if the scan ran
 
 └── LICENSES/
@@ -59,6 +60,12 @@ evidence to cite.
   "sbomFiles": ["sbom/app.spdx", "..."],
   "sbomJsonFiles": ["sbom/app.spdx.json", "sbom/files.spdx.json", "..."],
   "vexFiles": ["sbom/vex/<product>.openvex.json", "..."],
+  "manualReview": {
+    "file": "sbom/manual-review.csv",
+    "sha256": "...",
+    "components": 9,
+    "pending": 7
+  },
   "firmware": [{"path": "firmware/zephyr.bin", "sha256": "...", "bytes": 0}],
   "licenses": {
     "identified": 4,
@@ -91,6 +98,11 @@ Rules:
 - `vexFiles` lists the VEX documents carried in `sbom/vex/`; the repository's
   `vex/` directory is copied verbatim, so updating a statement is a file change
   rather than a pipeline change.
+- `manualReview` describes `sbom/manual-review.csv`, the record for components
+  the scanner cannot cover. `pending` counts rows whose conclusion still
+  contains `pending`; such a component must not be presented as clean. Start
+  from `manual-review/manual-review.example.csv` in the kit and keep the file
+  in the repository, not in the build output.
 - `sbomJsonFiles` lists the JSON views (per-document SPDX, file-level pair,
   dependency graph). The tag-value documents remain the source of truth.
 
