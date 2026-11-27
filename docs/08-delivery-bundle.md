@@ -99,8 +99,9 @@ Rules:
   `vex/` directory is copied verbatim, so updating a statement is a file change
   rather than a pipeline change.
 - `manualReview` describes `sbom/manual-review.csv`, the record for components
-  the scanner cannot cover. `pending` counts rows whose conclusion still
-  contains `pending`; such a component must not be presented as clean. Start
+  the scanner cannot cover. `pending` counts rows whose conclusion is still
+  open (`pending` or `under_investigation`); such a component must not be
+  presented as clean. Start
   from `manual-review/manual-review.example.csv` in the kit and keep the file
   in the repository, not in the build output.
 - `sbomJsonFiles` lists the JSON views (per-document SPDX, file-level pair,
